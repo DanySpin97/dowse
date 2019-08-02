@@ -1,0 +1,10 @@
+#!/bin/sh
+
+. /opt/dowse/env
+
+# Add pg2ipset to PATH
+PATH=${dowse_install_dir}/src/pg2ipset:${PATH}
+
+# Runs every day
+snooze -d '*' -t ${dowse_livedir}/pg2ipset-timefile \
+		${dowse_install_dir}/src/pg2ipset/ipset-update.sh

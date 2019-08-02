@@ -19,3 +19,6 @@
 [submodule "src/redis"]
 	path = src/redis
 	url = https://github.com/antirez/redis
+[submodule "src/pg2ipset"]
+	path = src/pg2ipset
+	url = git@github.com:ilikenwf/pg2ipset.git
