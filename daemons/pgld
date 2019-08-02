@@ -1,8 +1,0 @@
-#!/bin/sh
-
-. /opt/dowse/env
-. ${dowse_daemons_conf}/pgld
-
-pid=${dowse_livedir}/pgld.pid
-pgld -p $pid -r dowse_reject -a dowse_accept ${daemons_conf}/pgld
-
