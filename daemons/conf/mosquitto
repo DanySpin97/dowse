@@ -1,8 +1,8 @@
 #!/usr/bin/env zsh
 #
-# Copyright (C) 2012-2015 Dyne.org Foundation
+# Copyright (C) 2015-2016 Dyne.org Foundation
 #
-# Dowse is written and maintained by Denis Roio <jaromil@dyne.org>
+# Dowse is designed, written and maintained by Denis Roio <jaromil@dyne.org>
 #
 # This source code is free software; you can redistribute it
 # and/or modify it under the terms of the GNU Public License
@@ -21,28 +21,22 @@
 # Software Foundation, Inc., 675 Mass Ave, Cambridge, MA
 # 02139, USA.
 
-seccrond-conf() {
-	fn seccrond-conf
-	cat <<EOF
-*/50 * * * * * $R/bin/pendulum nmap
-*/10 * * * * * $R/bin/pendulum watchdog
-*/1 * * * * * $R/bin/pendulum nextcmd
-#*/5 * * * * * $R/bin/pendulum rrdns
+source /opt/dowse/env
+
+cat <<EOF > ${daemons_conf}/mosquitto
+pid_file ${dowse_livedir}/mosquitto.pid
+user ${dowse_uid}
+# bind_address $address
+
+listener 1883
+protocol mqtt
+
+listener 1888
+protocol websockets
+
+log_dest file ${dowse_log}/mosquitto.log
+# websockets_log_level 0
+# connection_messages true
+allow_anonymous true
 EOF
-}
 
-seccrond-exec() {
-	fn seccrond-exec
-	freq=($conf)
-	ckreq || return $?
-
-	func "Clean the lock"
-	lock_list=(watchdog nextcmd nmap netscan)
-	for i in $lock_list ; do
-	    print "DEL lock_$i " | redis runtime
-	done
-
-	#---
-	launch seccrond -f $conf -p $H/run/seccrond.pid
-	savepid seccrond $H/run/seccrond.pid
-}

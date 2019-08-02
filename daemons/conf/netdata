@@ -1,0 +1,49 @@
+#!/usr/bin/env zsh
+
+source /opt/dowse/netdata
+
+cat <<EOF > ${daemons_conf}/netdata
+[global]
+    # special port for dowse
+    port = 29999
+    ip version = ipv4
+    bind socket to ip = 127.0.0.1
+
+    run as user = $dowse_uid
+    web files owner = $dowse_uid
+    web files group = $dowse_gid
+
+    error log  = ${dowse_livedir}/netdata-error.log
+    access log = ${dowse_livedir}/netdata-access.log
+    debug log  = ${dowse_livedir}/netdata-debug.log
+
+    memory deduplication = yes
+    # save - dump on exit
+    # map  - write to disk realtime
+    memory mode = ram
+
+[plugins]
+	tc = no
+	idlejitter = no
+	cgroups = no
+	checks = no
+	apps = no
+	node.d = no
+
+[plugin:proc]
+        /proc/diskstats = no
+        /proc/net/ip_vs/stats = no
+        /proc/vmstat = no
+        /proc/net/rpc/nfsd = no
+        /proc/interrupts = no
+        /proc/softirqs = no
+        /sys/kernel/mm/ksm = no
+
+[plugin:proc:/proc/stat]
+        cpu interrupts = no
+
+[plugin:proc:/proc/meminfo]
+        system swap = no
+
+EOF
+

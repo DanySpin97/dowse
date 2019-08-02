@@ -1,184 +1,37 @@
 #!/usr/bin/env zsh
 
+. /opt/dowse/env
+. ${dowse_daemons_conf}/mysqld
 
-mysqld-conf() {
-cat << EOF
-[client]
-port		= 63306
-socket		= $H/run/mysql/mysqld.sock
-#socket		= /tmp/mysqld.sock
-
-[mysqld]
-user		= $dowse_uid
-plugin_dir      = /usr/local/dowse/mysql/plugin
-pid-file	= $H/run/mysqld.pid
-socket		= $H/run/mysql/mysqld.sock
-#socket		= /tmp/mysqld.sock
-port		= 63306
-basedir		= $R/mysql
-datadir		= $H/data/mysql
-tmpdir		= /tmp
-lc-messages-dir	= $R/mysql/share
-skip-external-locking
-bind-address		= 127.0.0.1
-#======================================
-# /etc/my.cnf:
-innodb_buffer_pool_size=5M
-innodb_log_buffer_size=256K
-
-query_cache_size=0
-max_connections=5
-key_buffer_size=8
-thread_cache_size=0
-host_cache_size=0
-innodb_ft_cache_size=1600000
-innodb_ft_total_cache_size=32000000
-
-# per thread or per operation settings
-thread_stack=131072
-sort_buffer_size=32K
-read_buffer_size=8200
-read_rnd_buffer_size=8200
-max_heap_table_size=16K
-tmp_table_size=1K
-bulk_insert_buffer_size=0
-join_buffer_size=128
-net_buffer_length=1K
-innodb_sort_buffer_size=64K
-
-#settings that relate to the binary log (if enabled)
-binlog_cache_size=4K
-binlog_stmt_cache_size=4K
-#======================================
-
-key_buffer		= 16M
-max_allowed_packet	= 16M
-thread_stack		= 192K
-thread_cache_size       = 8
-
-myisam-recover         = BACKUP
-#max_connections        = 100
-#table_cache            = 64
-#thread_concurrency     = 10
-
-query_cache_limit	= 1M
-query_cache_size        = 4M
-
-# Be aware that this log type is a performance killer.
-# As of 5.1 you can enable the log at runtime!
-general_log_file        = $H/log/general_mysql.log
-general_log             = 1
-
-# Error log - should be very few entries.
-log_error = $H/log/mysql_error.log
-
-# Here you can see queries with especially long duration
-slow_query_log_file = $H/log/mysql-slow.log
-slow_query_log      = 1
-long_query_time = 1
-log_queries_not_using_indexes
-
-# The following can be used as easy to replay backup logs or for replication.
-# note: if you are setting up a replication slave, see README.Debian about
-#       other settings you may need to change.
-#server-id		= 1
-#log_bin			= /var/log/mysql/mysql-bin.log
-expire_logs_days	= 10
-max_binlog_size     = 100M
-#binlog_do_db		= include_database_name
-#binlog_ignore_db	= include_database_name
-
-# InnoDB is enabled by default with a 10MB datafile in /var/lib/mysql/.
-# Read the manual for more InnoDB related options. There are many!
-#
-# * Security Features
-#
-# Read the manual, too, if you want chroot!
-# chroot = /var/lib/mysql/
-
-[mysqldump]
-quick
-quote-names
-max_allowed_packet	= 16M
-
-[mysql]
-# faster start of mysql but no tab completition
-no-auto-rehash
-
-[isamchk]
-key_buffer		= 16M
-
-
-# to reduce CPU consumption
-skip_name_resolve = ON
-
-# only to eliminate false warning
-innodb_log_file_size=1048576
-innodb_buffer_pool_instances=1
-
-EOF
-}
-
-mysqld-exec() {
-	fn mysqld-exec $*
-	req=(conf)
-	exe=${1:-${execmap[mysqld]}}
-    freq=($exe $conf)
-	ckreq || return $?
-
-	mkdir -p $H/data/mysql
-	mkdir -p $H/run/mysql
-
-	[[ -r $H/data/mysql/ibdata1 ]] || {
-		notice "Initialisation of MySQL databases"
-		$R/mysql/bin/mysql_install_db --user=$dowse_uid \
-									  --force \
-									  --basedir=$R/mysql \
-									  --datadir=$H/data/mysql
-		
-	}
-
-	launch mysqld --defaults-file="$conf" &!
-
-	savepid mysqld $H/run/mysqld.pid
-
-	# set root password
-	sql_set_root_password 'p4ssw0rd' $H/data/mysqld.setted_password
-	
-	# make sure the current database exists
-	sql_create_database things
-	
-	# cut used to parse out what follows semicolon
-	cut -d\; -f1 $thingidx |
-            sql_create_table found | $sql $db[things] 2>/dev/null
-	
-	cut -d\; -f1 $eventidx |
-	    sql_create_table event | $sql $db[things] 2>/dev/null
-
-	cut -d\; -f1 $parameteridx |
-	    sql_create_table parameter | $sql $db[things] 2>/dev/null
-
-	act "Adding DB constraint"
-	cat $constraintidx | $sql $db[things] 2>/dev/null
-
-	act "Populate the parameter table"
-	echo "INSERT IGNORE INTO parameter(variable,value) VALUES ('state all things','ON') " | $sql $db[things] 2>/dev/null
-	echo "INSERT IGNORE INTO parameter(variable,value) VALUES ('party mode','OFF') " | $sql $db[things] 2>/dev/null
-
-	# create trigger and redis function
-	sql_integrate_with_redis $H/data/mysqld.integrated_redis
-}
-
-mysqld-kill() {
-	fn mysqld-kill $*
-	_pid=`getpid mysqld`
-	req=(_pid)
-	ckreq || return $?
-
-	print "SHUTDOWN;" | $sql
-	[[ $? = 0 ]] && {
-		waitpid $_pid
-		rm -f $H/run/mysqld.pid
-	}
+mkdir -p ${dowse_working_dir}/data/mysql
+mkdir -p ${dowse_livedir}/mysql
+[[ -r ${dowse_working_dir}/data/mysql/ibdata1 ]] || {
+	notice "Initialisation of MySQL databases"
+	${dowse_install_dir}/mysql/bin/mysql_install_db --user=$dowse_uid \
+								  --force \
+								  --basedir=${dowse_install_dir}/mysql \
+								  --datadir=${dowse_working_dir}/data/mysql
 
 }
+mysqld --defaults-file="${daemons_conf}/mysqld" &!
+
+sql_set_root_password 'p4ssw0rd' ${dowse_working_dir}/data/mysqld.setted_password
+
+# make sure the current database exists
+sql_create_database things
+
+# cut used to parse out what follows semicolon
+cut -d\; -f1 $thingidx |
+           sql_create_table found | $sql $db[things] 2>/dev/null
+
+cut -d\; -f1 $eventidx |
+    sql_create_table event | $sql $db[things] 2>/dev/null
+cut -d\; -f1 $parameteridx |
+    sql_create_table parameter | $sql $db[things] 2>/dev/null
+act "Adding DB constraint"
+cat $constraintidx | $sql $db[things] 2>/dev/null
+act "Populate the parameter table"
+echo "INSERT IGNORE INTO parameter(variable,value) VALUES ('state all things','ON') " | $sql $db[things] 2>/dev/null
+echo "INSERT IGNORE INTO parameter(variable,value) VALUES ('party mode','OFF') " | $sql $db[things] 2>/dev/null
+# create trigger and redis function
+sql_integrate_with_redis ${dowse_working_dir}/data/mysqld.integrated_redis

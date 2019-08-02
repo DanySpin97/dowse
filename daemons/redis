@@ -1,115 +1,17 @@
 #!/usr/bin/env zsh
 
-redis-server-conf() {
-    fn redis-server-conf
+. /opt/dowse/env
+. ${dowse_daemons_conf}/redis
 
-    cat <<EOF
-daemonize yes
-pidfile $H/run/redis-server.pid
-logfile $H/log/redis-server.log
-port 6379
+redis-server ${dowse_generated_conf}/redis $*
 
-# tcp-backlog 511
-
-bind 127.0.0.1
-
-maxclients 100
-
-timeout 0
-
-tcp-keepalive 0
-
-loglevel notice
-
-databases 1
-
-save 900 1
-save 300 10
-save 60 10000
-
-stop-writes-on-bgsave-error yes
-
-rdbcompression yes
-
-rdbchecksum yes
-
-dbfilename dump.rdb
-
-dir $H/run
-
-repl-disable-tcp-nodelay no
-
-appendonly no
-
-appendfilename "appendonly.aof"
-
-appendfsync everysec
-
-no-appendfsync-on-rewrite no
-
-auto-aof-rewrite-percentage 100
-auto-aof-rewrite-min-size 64mb
-
-lua-time-limit 5000
-
-slowlog-log-slower-than 10000
-
-slowlog-max-len 128
-
-# latency-monitor-threshold 0
-
-notify-keyspace-events ""
-
-hash-max-ziplist-entries 512
-hash-max-ziplist-value 64
-
-list-max-ziplist-entries 512
-list-max-ziplist-value 64
-
-set-max-intset-entries 512
-
-zset-max-ziplist-entries 128
-zset-max-ziplist-value 64
-
-# hll-sparse-max-bytes 3000
-
-activerehashing yes
-
-client-output-buffer-limit normal 0 0 0
-client-output-buffer-limit slave 256mb 64mb 60
-client-output-buffer-limit pubsub 32mb 8mb 60
-
-hz 10
-
-aof-rewrite-incremental-fsync yes
-EOF
+# we consider these to tell us if it's the initial startup of redis
+# yes, redis returns 1 if a key is found
+print "exists state_all_things" | redis storage && {
+	print "set state_all_things on" | redis storage
 }
 
-redis-server-exec() {
-    fn redis-server-exec $*
-    exe=${1:-${execmap[redis-server]}}
-    req=(conf exe)
-    freq=($conf $exe)
-    ckreq || return 1
-
-    [[ "$1" = "" ]] || shift 1
-
-    pidfile=`awk '/pidfile/ { print $2 }' $conf`
-    func "redis $conf $* (pidfile: $pidfile)"
-
-    launch redis-server $conf $*
-
-	# we consider these to tell us if it's the initial startup of redis
-	# yes, redis returns 1 if a key is found
-	print "exists state_all_things" | redis storage && {
-		print "set state_all_things on" | redis storage
-	}
-
-	print "exists party_mode" | redis storage && {
-		print "set party_mode off" | redis storage
-	}
-
-    savepid redis-server $pidfile
-
-    return $?
+print "exists party_mode" | redis storage && {
+	print "set party_mode off" | redis storage
 }
+

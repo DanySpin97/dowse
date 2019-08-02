@@ -1,65 +1,11 @@
 #!/usr/bin/zsh
 
-netdata-conf() {
-    cat <<EOF
-[global]
-    # special port for dowse
-    port = 29999
-    ip version = ipv4
-    bind socket to ip = 127.0.0.1
+. /opt/dowse/env
+. ${dowse_daemons_conf}/netdata
 
-    run as user = $dowse_uid
-    web files owner = $dowse_uid
-    web files group = $dowse_gid
+mkdir -p ${dowse_working_dir}/lib/netdata/registry
+mkdir -p ${dowse_working_dir}/cache/netdata
 
-    error log  = $H/run/netdata-error.log
-    access log = $H/run/netdata-access.log
-    debug log  = $H/run/netdata-debug.log
+pid=${dowse_livedir}/netdata.pid
+netdata -P $pid -c ${dowse_generated_conf}/netdata -p 29999
 
-    memory deduplication = yes
-    # save - dump on exit
-    # map  - write to disk realtime
-    memory mode = ram
-
-[plugins]
-	tc = no
-	idlejitter = no
-	cgroups = no
-	checks = no
-	apps = no
-	node.d = no
-
-[plugin:proc]
-        /proc/diskstats = no
-        /proc/net/ip_vs/stats = no
-        /proc/vmstat = no
-        /proc/net/rpc/nfsd = no
-        /proc/interrupts = no
-        /proc/softirqs = no
-        /sys/kernel/mm/ksm = no
-
-[plugin:proc:/proc/stat]
-        cpu interrupts = no
-
-[plugin:proc:/proc/meminfo]
-        system swap = no
-
-EOF
-}
-
-netdata-exec() {
-    fn netdata-start $*
-    req=(conf)
-    freq=($conf)
-    ckreq || return $?
-
-	# check if required dirs exist
-	mkdir -p $H/lib/netdata/registry
-	mkdir -p $H/cache/netdata
-
-    pid=$H/run/netdata.pid
-    launch netdata -P $pid -c $conf -p 29999
-    savepid netdata $pid
-
-    return $?
-}

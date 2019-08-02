@@ -1,0 +1,44 @@
+#!/usr/bin/env zsh
+
+rconf=""
+[[ -r ${dowse_livedir}/leases ]] && {
+	# load dhcp leases in redis
+	for i in ${(f)"$(cat ${dowse_livedir}/leases)"}; do
+		rconf+="SET dns-lease-${i[(w)4]} ${i[(w)3]}\n"
+		rconf+="SET dns-lease-${i[(w)4]}.dowse.it ${i[(w)3]}\n"
+		# and the hosts reverses
+		rconf+="SET dns-reverse-${i[(w)3]}. ${i[(w)4]}\n"
+	done
+}
+[[ -r /etc/dowse/network ]] && {
+	for i in ${(f)"$(cat /etc/dowse/network)"}; do
+		print "$i" | grep '^#' > /dev/null
+		[[ $? = 0 ]] && continue
+		# first word may be a mac address
+		print "${i[(w)1]}" | grep '^..:..:..:..:..:..' > /dev/null
+		if [[ $? = 0 ]]; then
+			mac="${i[(w)1]}"
+			hostname="${i[(w)2]}"
+			ip4="${i[(w)3]}"
+		else
+			mac=""
+			hostname="${i[(w)1]}"
+			ip4="${i[(w)2]}"
+		fi
+		rconf+="SET dns-lease-${hostname} ${ip4}\n"
+		rconf+="SET dns-lease-${hostname}.dowse.it ${ip4}\n"
+		func "+/etc/network: $mac $hostname $ip4"
+	done
+}
+# load the local hosts known
+rconf+="SET dns-lease-${hostname}          ${address}\n"
+rconf+="SET dns-lease-${hostname}.dowse.it ${address}\n"
+rconf+="SET dns-lease-www.dowse.it         ${address}\n"
+rconf+="SET dns-lease-dowse.it             ${address}\n"
+rconf+="SET dns-lease-gateway    ${wan}\n"
+# load the local hosts reverses
+rconf+="SET dns-reverse-${address}. ${hostname}.dowse.it\n"
+[[ "$address" = "$gateway" ]] ||
+	rconf+="SET dns-reverse-${wan}. gateway\n"
+print $rconf | redis dynamic
+

@@ -1,0 +1,18 @@
+#!/bin/zsh
+#
+# This file contains general variables used among the project.
+
+dowse_sysconfdir=/etc/dowse
+dowse_install_dir=/opt/dowse
+dowse_working_dir=/var/lib/dowse
+dowse_livedir=/var/run/dowse
+dowse_logdir=/var/log/dowse
+dowse_daemons=${dowse_install_dir}/daemons
+dowse_daemons_conf=${dowse_daemons}/conf
+dowse_generated_conf=${dowse_livedir}/conf
+
+source ${dowse_config}/settings
+
+dowse_uid=${dowse_uid:dowse}
+dowse_gid=${dowse_gid:dowse}
+

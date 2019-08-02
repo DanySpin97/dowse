@@ -21,13 +21,5 @@
 # Software Foundation, Inc., 675 Mass Ave, Cambridge, MA
 # 02139, USA.
 
-. /opt/dowse/env
-. ${dowse_daemons_conf}/dhcpd
+dowse-to-mqtt -p ${dowse_livedir}/dowse-to-mqtt.pid localhost -c log-queue &!
 
-conf=${dowse_generated_conf}/dhcpd.conf
-leases=${dowse_livedir}/leases
-touch ${leases}
-
-# Print output to stderr
-# -d implies -f (so it won't fork to background
-${dowse_install_dir}/src/dhcpd/dhcpd -d -lf ${leases} -cf ${conf} ${interface}

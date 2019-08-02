@@ -1,0 +1,18 @@
+#!/usr/bin/env zsh
+
+modprobe -q xt_NFQUEUE
+modprobe -q ipt_NFQUEUE
+
+cat --squeeze-blank ${dowse_conf}/blocklists/* |
+    # Ignore comment lines
+    grep -Ev "^[[:space:]]*#" |
+    # Replace repeated whitespace with a single occurence
+    tr -s '[:space:]' |
+    # Delete everything complimentary to the following characters/regex
+    # alphanumeric
+    # space
+    # :\*.-,[]
+    # newline (return gets removed, so CR+LF gets LF)
+    tr -cd '[:alnum:][:space:]:\\\*\.\-,[]\n' |
+    # Only keep the last occurence of :
+    sed 's/.*:/&|/' | tr -d : | tr "\|" ":"
