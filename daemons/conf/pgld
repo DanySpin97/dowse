@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/bin/sh
 
 modprobe -q xt_NFQUEUE
 modprobe -q ipt_NFQUEUE

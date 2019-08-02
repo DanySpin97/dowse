@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/bin/sh
 #
 # Copyright (C) 2015-2016 Dyne.org Foundation
 #

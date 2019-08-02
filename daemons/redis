@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/bin/sh
 
 . /opt/dowse/env
 . ${dowse_daemons_conf}/redis

@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/bin/sh
 
 # also see:
 # $R/run/pgl/lib/pgl/pglcmd.defaults

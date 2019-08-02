@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/bin/zsh
 
 . /opt/dowse/env
 . ${dowse_daemons_conf}/mysqld

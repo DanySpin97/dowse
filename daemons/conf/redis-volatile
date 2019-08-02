@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/bin/sh
 
 cat <<EOF > ${daemons_conf}/redis-volatile
 daemonize yes
