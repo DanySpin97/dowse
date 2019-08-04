@@ -18,7 +18,6 @@ all: base springs
 	install -s -p dowse-cmd-fifo  ../build/bin
 	cp -f parse-ip-neigh.py  ../build/bin
 	./checksum.sh $(DOWSE_USER)
-	./compile.sh sup
 
 node-red:
 	./import.sh node-red
@@ -26,7 +25,7 @@ node-red:
 libs:
 	make -C libdowse
 
-.PHONY: redis dnscrypt-proxy libwebsockets modprobe netdata seccrond hiredis-lock mosquitto pgld sup
+.PHONY: redis dnscrypt-proxy libwebsockets modprobe netdata hiredis-lock mosquitto
 
 base: config libs redis modprobe sup hiredis-lock dnscrypt-proxy dnscrypt_dowse.so netdata dhcpd libwebsockets mosquitto seccrond
 	@echo "Compiled base"
@@ -39,9 +38,6 @@ dnscrypt-proxy:
 
 dnscrypt_dowse.so:
 	@./compile.sh dnscrypt_dowse.so ${THREADS}
-
-pgld:
-	@./compile.sh pgld ${THREADS}
 
 netdata:
 	@rm -f netdata/web/version.txt
@@ -56,9 +52,6 @@ libwebsockets:
 
 mosquitto: libwebsockets
 	@./compile.sh mosquitto ${THREADS}
-
-seccrond:
-	@./compile.sh seccrond ${THREADS}
 
 springs: dowse-to-gource dowse-to-osc dowse-to-mqtt dowse-cmd-fifo
 	@echo "Dowse springs compiled"

@@ -92,13 +92,6 @@ case $1 in
 		popd
 		;;
 
-    seccrond)
-        pushd $R/src/seccrond
-        CFLAGS="$CFLAGS" make -j${THREADS} &&
-			install -s -p seccrond $R/build/bin
-        popd
-        ;;
-
     netdata)
         pushd $R/src/netdata
 		git checkout -- web
@@ -121,14 +114,6 @@ case $1 in
 		popd
 		;;
 
-    sup)
-        pushd $R/src/sup
-        # make sure latest config.h is compiled in
-        rm -f $R/src/sup/sup.o
-        make -j${THREADS} && install -s -p $R/src/sup/sup $R/build
-        popd
-        ;;
-
     dnscrypt-proxy)
         pushd $R/src/dnscrypt-proxy
 	## least bloated solution
@@ -147,15 +132,6 @@ case $1 in
 		./configure &&
 			make -j${THREADS} &&
             install -s -p .libs/dnscrypt_dowse.so $R/build/bin
-        popd
-        ;;
-
-    pgld)
-        pushd $R/src/pgld &&
-	    CFLAGS="$CFLAGS" \
-		  LDFLAGS="$LDFLAGS" \
-		  make -j${THREADS} &&
-        install -s -p $R/src/pgld/pgld $R/build/bin
         popd
         ;;
 
