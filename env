@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/zsh
 #
 # This file contains general variables used among the project.
 
@@ -13,6 +13,55 @@ dowse_generated_conf=${dowse_livedir}/conf
 
 source ${dowse_config}/settings
 
-dowse_uid=${dowse_uid:dowse}
-dowse_gid=${dowse_gid:dowse}
+# cover defaults
+interface=${interface:-lo}
+hostname=${hostname:-`hostname`}
+address=${address:-127.0.0.1}
+wan=${wan:-""}
+dns=${dns:-127.0.0.1}
+dowse_uid=${dowse_uid:-dowse}
+dowse_gid=${dowse_gid:-dowse}
+dowse_net=${dowse_net:-127.0.0.0/24}
+netmask=${netmask:-255.255.255.0}
+dowse_guests=${dowse_guests:-10.0.0.101,10.0.0.199,48h}
+lan=${lan:-dowse.it}
+
+firewall=${firewall:-yes}
+
+net_devices=()
+net.scan_devices
+net_ip4_addr=()
+net.scan_addresses
+
+for d in $net_devices; do
+	local _addr=${net_ip4_addr[$d]}
+	range=${_addr[(ws:/:)2]}
+	_addr=${_addr[(ws:/:)1]}
+	[[ "$_addr" = "" ]] && continue
+
+	wan=`ip route show dev $d | awk '/default/ {print $3}'`
+	[[ "$wan" = "" ]] && continue
+
+	act "$d $_addr $range # detected network config"
+	address=$_addr
+	interface=$d
+
+	# render the dowse_net
+	if [[ $range == 24 ]]; then
+		subn=${wan[(ws:.:)1]}.${wan[(ws:.:)2]}.${wan[(ws:.:)3]}
+		dowse_net=$subn.0/24
+		netmask=255.255.255.0
+		dowse_guests=$subn.101,$subn.199,48h
+	elif [[ $range == 16 ]]; then
+		subn=${wan[(ws:.:)1]}.${wan[(ws:.:)2]}
+		dowse_net=$subn.0.0/16
+		netmask=255.255.0.0
+		dowse_guests=$subn.0.101,$subn.255.199,48h
+	elif [[ $range == 8 ]]; then
+		subn=${wan[(ws:.:)1]}
+		dowse_net=${subn}.0.0.0/8
+		netmask=255.0.0.0
+		dowse_guests=$subn.0.0.101,$subn.255.255.199,48h
+	fi
+done
 
