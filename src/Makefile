@@ -1,22 +1,19 @@
 DESTDIR ?=
-PREFIX ?= /usr/local/dowse
+PREFIX ?= /opt/dowse
 THREADS ?= 1
 
 CC = gcc
-CFLAGS = -Wall -fPIE -fPIC -pie -O3 -I. -Iredis/deps/hiredis -Iredis/deps/jemalloc
-LIBS = -L src/redis/deps/hiredis -l:libhiredis.a -Llibdowse -l:libdowse.a
+CFLAGS = -Wall -fPIE -fPIC -pie -O3 -I.
+LIBS = -l:libhiredis.a -Llibdowse -l:libdowse.a
 
 all: base springs
 	./import.sh nmap-macs
-	install -s -p redis/src/redis-server ../build/bin
-	install -s -p redis/src/redis-cli ../build/bin
-	install -s -p modprobe        ../build/bin
-	install -s -p dowse-to-gource ../build/bin
-	install -s -p dowse-to-osc    ../build/bin
-	install -s -p dowse-to-mqtt   ../build/bin
-	install -s -p hiredis-lock    ../build/bin
-	install -s -p dowse-cmd-fifo  ../build/bin
-	cp -f parse-ip-neigh.py  ../build/bin
+	#install -s -p dowse-to-gource ../build/bin
+	#install -s -p dowse-to-osc    ../build/bin
+	#install -s -p dowse-to-mqtt   ../build/bin
+	#install -s -p hiredis-lock    ../build/bin
+	#install -s -p dowse-cmd-fifo  ../build/bin
+	#cp -f parse-ip-neigh.py  ../build/bin
 	./checksum.sh $(DOWSE_USER)
 
 node-red:
@@ -25,33 +22,13 @@ node-red:
 libs:
 	make -C libdowse
 
-.PHONY: redis dnscrypt-proxy libwebsockets modprobe netdata hiredis-lock mosquitto
+.PHONY: hiredis-lock
 
-base: config libs redis modprobe sup hiredis-lock dnscrypt-proxy dnscrypt_dowse.so netdata dhcpd libwebsockets mosquitto seccrond
+base: config libs hiredis-lock netdata-plugins
 	@echo "Compiled base"
 
-redis:
-	@./compile.sh redis ${THREADS}
-
-dnscrypt-proxy:
-	@./compile.sh dnscrypt-proxy ${THREADS}
-
-dnscrypt_dowse.so:
-	@./compile.sh dnscrypt_dowse.so ${THREADS}
-
-netdata:
-	@rm -f netdata/web/version.txt
-	@./compile.sh netdata ${THREADS}
-	@./compile.sh netdata-plugins ${THREADS}
-
-dhcpd:
-	@./compile.sh dhcpd ${THREADS}
-
-libwebsockets:
-	@./compile.sh libwebsockets ${THREADS}
-
-mosquitto: libwebsockets
-	@./compile.sh mosquitto ${THREADS}
+netdata-plugins:
+	make -C netdata-plugins
 
 springs: dowse-to-gource dowse-to-osc dowse-to-mqtt dowse-cmd-fifo
 	@echo "Dowse springs compiled"
@@ -84,14 +61,12 @@ dowse-to-mqtt: mosquitto dowse-to-mqtt.o
 	$(CC) $(CFLAGS) -o $@ dowse-to-mqtt.o $(LIBS) -L./mosquitto/lib/ -lmosquitto    -lpthread
 
 
-install:
-	install -d ${DESTDIR}${PREFIX}
-	install -d ${DESTDIR}${PREFIX}/domain-list/data
-	install -p -m 644 domain-list/data/* ${DESTDIR}${PREFIX}/domain-list/data
-	install -d ${DESTDIR}${PREFIX}/share
-	install dnscrypt-proxy/dnscrypt-resolvers.csv ${DESTDIR}${PREFIX}/share/
-	make -C netdata install
-	make -C netdata-plugins install
+#install:
+	#install -d ${DESTDIR}${PREFIX}
+	#install -d ${DESTDIR}${PREFIX}/domain-list/data
+	#install -p -m 644 domain-list/data/* ${DESTDIR}${PREFIX}/domain-list/data
+	#install -d ${DESTDIR}${PREFIX}/share
+	#install dnscrypt-proxy/dnscrypt-resolvers.csv ${DESTDIR}${PREFIX}/share/
 #	@./compile.sh install
 
 clean:
@@ -102,15 +77,5 @@ clean:
 	rm -f modprobe dowse-to-osc dowse-to-gource dowse-to-mqtt
 	rm -f hiredis-lock
 	rm -f netdata/web/version.txt
-	make -C redis				 clean
-	make -C dhcp                 clean
-	make -C sup                  clean
-	make -C dnscrypt-proxy       clean
-	make -C dnscrypt-plugin      clean
-	make -C pgld                 clean
-	make -C netdata              clean
 	make -C netdata-plugins      clean
-	make -C libwebsockets	     clean
-	make -C mosquitto            clean
-	make -C seccrond			 clean
 	make -C libdowse			 clean
