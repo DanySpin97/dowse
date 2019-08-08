@@ -1,0 +1,6 @@
+#!/bin/sh
+
+. /opt/dowse/env
+. ${dowse_daemons_conf}/stubby
+
+stubby -C ${dowse_generated_conf}/stubby.yml

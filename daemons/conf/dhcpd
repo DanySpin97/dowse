@@ -17,15 +17,14 @@
 # Software Foundation, Inc., 675 Mass Ave, Cambridge, MA
 # 02139, USA.
 
-netzero=${dowse_net[(ws:/:)1]}
+netzero=${dowse_net%/*}
 # if no base network specified, use class C
 # TODO: better deduction based on netmask if known
-[[ "$netzero" = "" ]] && netzero=${address%.*}.0
-range_start=${dowse_guests[(ws:,:)1]}
-range_stop=${dowse_guests[(ws:,:)2]}
-func "dhcpd address:     $address"
-func "dhcpd guest range: $range_start - $range_stop"
-cat <<EOF > ${daemons_conf}/dhcpd.conf
+[ "$netzero" = "" ] && netzero=${address%.*}.0
+range_start=${dowse_guests%%,*}
+range_stop=${dowse_guests#*,}
+range_stop=${range_stop%,*}
+cat <<EOF > $dowse_generated_conf/dhcpd.conf
 option routers $address;
 option domain-name "dowse.it";
 option domain-name-servers $address;
@@ -37,13 +36,13 @@ omapi-port 7911;
 default-lease-time 2592000;
 max-lease-time 7776000;
 
-subnet ${netzero} netmask ${netmask} {
-  range ${range_start} ${range_stop};
+subnet $netzero netmask $netmask {
+  range $range_start $range_stop;
 
   on commit {
     set clip = binary-to-ascii(10, 8, ".", leased-address);
     set clhw  = binary-to-ascii(16, 8, ":", substring(hardware, 1, 6));
-    execute("${dowse_install_dir}/pendulum", "lease", clip, clhw, host-decl-name);
+    execute("$dowse_install_dir/pendulum", "lease", clip, clhw, host-decl-name);
   }
 }
 EOF

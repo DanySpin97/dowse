@@ -3,9 +3,9 @@
 . /opt/dowse/env
 . ${dowse_daemons_conf}/netdata
 
-mkdir -p ${dowse_working_dir}/lib/netdata/registry
-mkdir -p ${dowse_working_dir}/cache/netdata
+mkdir -p $dowse_working_dir/lib/netdata/registry
+mkdir -p $dowse_working_dir/cache/netdata
 
-pid=${dowse_livedir}/netdata.pid
-netdata -P $pid -c ${dowse_generated_conf}/netdata -p 29999
+pid=$dowse_livedir/netdata.pid
+netdata -D -P $pid -c $dowse_generated_conf/netdata.conf -p 29999
 

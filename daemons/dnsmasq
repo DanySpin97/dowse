@@ -1,0 +1,6 @@
+#!/bin/sh
+
+. /opt/dowse/env
+. ${dowse_daemons_conf}/dnsmasq
+
+dnsmasq --conf-file=${dowse_generated_conf}/dnsmasq.conf --no-daemon

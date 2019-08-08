@@ -1,8 +1,6 @@
 #!/bin/sh
 
-source /opt/dowse/netdata
-
-cat <<EOF > ${daemons_conf}/netdata
+cat <<EOF > $dowse_generated_conf/netdata.conf
 [global]
     # special port for dowse
     port = 29999

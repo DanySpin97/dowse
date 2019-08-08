@@ -22,7 +22,7 @@
 # 02139, USA.
 
 . /opt/dowse/env
-. ${dowse_daemons_conf}/mosquitto
+. $dowse_daemons_conf/mosquitto
 
-mosquitto -c ${dowse_generated_conf}/mosquitto -d
+mosquitto -c $dowse_generated_conf/mosquitto.conf
 
