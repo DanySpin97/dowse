@@ -29,7 +29,7 @@
 #include <sys/types.h>
 
 // libmosquitto
-#include "mosquitto/lib/mosquitto.h"
+#include <mosquitto.h>
 
 #include <libdowse/dowse.h>
 
@@ -60,9 +60,9 @@ int main(int argc, char **argv) {
   len_channel_list=strlen(DNS_QUERY_CHANNEL);
 
   channel_list=(char*) malloc(len_channel_list+1);
-  
+
   snprintf(channel_list,len_channel_list+1,DNS_QUERY_CHANNEL);
-  
+
   char id[25];
     const char *host;
     int port    = 1883;
@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
 
     while((opt = getopt(argc, argv, "p:c:")) != -1) {
 	    switch(opt) {
-		    case 'p':			    
+		    case 'p':
 			    snprintf(pidfile,MAX_OUTPUT,"%s",optarg);
 			    break;
 		    case 'c':
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
 
 		      free(channel_list);
 		      channel_list=new_list;
-		      
+
 		      break;
 	    }
     }
@@ -176,13 +176,13 @@ int main(int argc, char **argv) {
         mres = mosquitto_publish(mosq, NULL, reply->element[1]->str,
                                  reply->element[2]->len, reply->element[2]->str,
                                  1 /*qos*/, false);
-	/*	
+	/*
 	for (int i=0;i<reply->elements;i++){
 	  fprintf(stderr," %d %s\n",i,reply->element[i]->str);
 	}
 	fprintf(stderr,"\n------------\n");
 	*/
-	
+
         // Returns
         //  MOSQ_ERR_SUCCESS	on success.
         //  MOSQ_ERR_INVAL	if the input parameters were invalid.
@@ -192,7 +192,7 @@ int main(int argc, char **argv) {
         // 	MOSQ_ERR_PAYLOAD_SIZE	if payloadlen is too large.
         if(mres != MOSQ_ERR_SUCCESS)
 	        err("error publishing message to mosquitto");
-    
+
         mosquitto_loop(mosq, -1, 1);
 
         // TODO: check returned value

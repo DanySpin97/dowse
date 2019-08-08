@@ -1,9 +1,9 @@
 #!/bin/sh
 
-cat <<EOF
-daemonize yes
+cat <<EOF > $dowse_generated_conf/redis.conf
+daemonize no
 pidfile ${dowse_livedir}/redis-server.pid
-logfile ${dowse_log}/redis-server.log
+logfile ${dowse_logdir}/redis-server.log
 port 6379
 
 # tcp-backlog 511
@@ -32,7 +32,7 @@ rdbchecksum yes
 
 dbfilename dump.rdb
 
-dir ${dowse_livedir}/run
+dir ${dowse_livedir}
 
 repl-disable-tcp-nodelay no
 

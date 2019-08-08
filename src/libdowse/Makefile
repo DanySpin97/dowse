@@ -1,4 +1,5 @@
 CFLAGS ?= -O2 -Wall  -fPIE -fPIC -pie -I ../redis/deps/hiredis
+CFLAGS+=$(shell pkg-config --cflags hiredis)
 #-DDEBUG=1
 
 CC = gcc

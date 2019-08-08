@@ -4,21 +4,35 @@ THREADS ?= 1
 
 CC = gcc
 CFLAGS = -Wall -fPIE -fPIC -pie -O3 -I.
+CFLAGS+=$(shell pkg-config --cflags hiredis)
 LIBS = -l:libhiredis.a -Llibdowse -l:libdowse.a
 
-#all: base springs
-	#./import.sh nmap-macs
+NODE_RED_MODULES= node-red \
+		node-red-dashboard \
+		node-red-contrib-ifttt \
+		node-red-contrib-got \
+		node-red-contrib-get-hrefs \
+		node-red-contrib-get-feeds \
+		node-red-contrib-device-stats \
+		node-red-contrib-chatbot \
+		node-red-ddm \
+		node-red-node-pisrf \
+		node-red-node-random \
+		node-red-node-smooth \
+		node-red-node-twitter
+
+all: base springs
 	#./checksum.sh $(DOWSE_USER)
 
 node-red:
-	npm install node-red
+	npm install $(NODE_RED_MODULES)
 
 libs:
 	make -C libdowse
 
 .PHONY: hiredis-lock
 
-base: config libs node-red netdata-plugins
+base: libs node-red netdata-plugins
 	@echo "Compiled base"
 
 netdata-plugins:
@@ -27,8 +41,8 @@ netdata-plugins:
 springs: dowse-to-gource dowse-to-osc dowse-to-mqtt dowse-cmd-fifo
 	@echo "Dowse springs compiled"
 
-config:
-	@./config.sh ${DESTDIR}${PREFIX}
+#config:
+	#@./config.sh ${DESTDIR}${PREFIX}
 
 .c.o:
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -51,11 +65,10 @@ dowse-to-gource: dowse-to-gource.o
 dowse-to-osc: dowse-to-osc.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS) -llo
 
-dowse-to-mqtt: mosquitto dowse-to-mqtt.o
+dowse-to-mqtt: dowse-to-mqtt.o
 	$(CC) $(CFLAGS) -o $@ dowse-to-mqtt.o $(LIBS) -L./mosquitto/lib/ -lmosquitto    -lpthread
 
 clean:
-	@./compile.sh clean
 	rm -f *.o
 	rm -f *.zkv
 	rm -f database.h execrules.h

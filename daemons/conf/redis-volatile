@@ -1,7 +1,7 @@
 #!/bin/sh
 
-cat <<EOF > ${daemons_conf}/redis-volatile
-daemonize yes
+cat <<EOF > $dowse_generated_conf/redis-volatile.conf
+daemonize no
 pidfile ${dowse_livedir}/redis-volatile.pid
 logfile ${dowse_logdir}/redis-volatile.log
 port 6378

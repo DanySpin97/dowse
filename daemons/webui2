@@ -4,5 +4,5 @@ hostname=$hostname \
 		domain=$lan \
 		address=$address \
 		interface=$interface \
-		webui2 -p ${dowse_livedir}/webui2.pid >/dev/null 2>/dev/null &!
+		exec webui2 -p ${dowse_livedir}/webui2.pid >/dev/null 2>/dev/null
 

@@ -1,8 +1,8 @@
 #!/bin/sh
 
 . /opt/dowse/env
-. ${dowse_daemons_conf}/redis-volatile
+. $dowse_daemons_conf/redis-volatile
 
-mkdir -p ${dowse_livedir}/redis-volatile
-redis-server
+mkdir -p $dowse_livedir/redis-volatile
+exec redis-server $dowse_generated_conf/redis-volatile.conf
 

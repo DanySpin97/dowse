@@ -30,4 +30,4 @@ touch $leases
 
 # Print output to stderr
 # -d implies -f (so it won't fork to background)
-dhcpd -d -q -lf $leases -pf $dowse_livedir/dhcpd.pid -cf $conf $interface
+exec dhcpd -d -q -lf $leases -pf $dowse_livedir/dhcpd.pid -cf $conf $interface

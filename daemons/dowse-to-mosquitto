@@ -21,5 +21,8 @@
 # Software Foundation, Inc., 675 Mass Ave, Cambridge, MA
 # 02139, USA.
 
-dowse-to-mqtt -p ${dowse_livedir}/dowse-to-mqtt.pid localhost -c log-queue &!
+. /opt/dowse/env
+
+exec $dowse_install_dir/src/dowse-to-mqtt \
+		-p ${dowse_livedir}/dowse-to-mqtt.pid localhost -c log-queue
 

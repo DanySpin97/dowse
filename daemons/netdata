@@ -7,5 +7,5 @@ mkdir -p $dowse_working_dir/lib/netdata/registry
 mkdir -p $dowse_working_dir/cache/netdata
 
 pid=$dowse_livedir/netdata.pid
-netdata -D -P $pid -c $dowse_generated_conf/netdata.conf -p 29999
+exec netdata -D -P $pid -c $dowse_generated_conf/netdata.conf -p 29999
 

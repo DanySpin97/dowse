@@ -3,4 +3,4 @@
 . /opt/dowse/env
 . ${dowse_daemons_conf}/stubby
 
-stubby -C ${dowse_generated_conf}/stubby.yml
+exec stubby -C ${dowse_generated_conf}/stubby.yml
