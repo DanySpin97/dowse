@@ -21,10 +21,7 @@
 # Software Foundation, Inc., 675 Mass Ave, Cambridge, MA
 # 02139, USA.
 
-source /opt/dowse/env
-
-mkdir -p ${dowse_livedir}/node-red/nodes
-cat <<EOF > ${daemons_conf}/node-red
+cat <<EOF > $dowse_generated_conf/node-red.conf
 module.exports = {
     // the tcp port that the Node-RED web server is listening on
     uiPort: process.env.PORT || 1880,

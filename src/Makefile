@@ -6,25 +6,19 @@ CC = gcc
 CFLAGS = -Wall -fPIE -fPIC -pie -O3 -I.
 LIBS = -l:libhiredis.a -Llibdowse -l:libdowse.a
 
-all: base springs
-	./import.sh nmap-macs
-	#install -s -p dowse-to-gource ../build/bin
-	#install -s -p dowse-to-osc    ../build/bin
-	#install -s -p dowse-to-mqtt   ../build/bin
-	#install -s -p hiredis-lock    ../build/bin
-	#install -s -p dowse-cmd-fifo  ../build/bin
-	#cp -f parse-ip-neigh.py  ../build/bin
-	./checksum.sh $(DOWSE_USER)
+#all: base springs
+	#./import.sh nmap-macs
+	#./checksum.sh $(DOWSE_USER)
 
 node-red:
-	./import.sh node-red
+	npm install node-red
 
 libs:
 	make -C libdowse
 
 .PHONY: hiredis-lock
 
-base: config libs hiredis-lock netdata-plugins
+base: config libs node-red netdata-plugins
 	@echo "Compiled base"
 
 netdata-plugins:
@@ -60,21 +54,12 @@ dowse-to-osc: dowse-to-osc.o
 dowse-to-mqtt: mosquitto dowse-to-mqtt.o
 	$(CC) $(CFLAGS) -o $@ dowse-to-mqtt.o $(LIBS) -L./mosquitto/lib/ -lmosquitto    -lpthread
 
-
-#install:
-	#install -d ${DESTDIR}${PREFIX}
-	#install -d ${DESTDIR}${PREFIX}/domain-list/data
-	#install -p -m 644 domain-list/data/* ${DESTDIR}${PREFIX}/domain-list/data
-	#install -d ${DESTDIR}${PREFIX}/share
-	#install dnscrypt-proxy/dnscrypt-resolvers.csv ${DESTDIR}${PREFIX}/share/
-#	@./compile.sh install
-
 clean:
 	@./compile.sh clean
 	rm -f *.o
 	rm -f *.zkv
 	rm -f database.h execrules.h
-	rm -f modprobe dowse-to-osc dowse-to-gource dowse-to-mqtt
+	rm -f dowse-to-osc dowse-to-gource dowse-to-mqtt
 	rm -f hiredis-lock
 	rm -f netdata/web/version.txt
 	make -C netdata-plugins      clean

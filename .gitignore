@@ -189,6 +189,9 @@ src/dhcp/omapip/svtest
 src/dhcp/relay/dhcrelay
 src/dhcp/server/dhcpd
 
+# node_modules for node-red
+src/package-lock.json
+src/node_modules
 
 src/mosquitto/src/mosquitto
 webui.pid

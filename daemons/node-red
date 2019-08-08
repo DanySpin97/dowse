@@ -22,9 +22,14 @@
 # 02139, USA.
 
 . /opt/dowse/env
-. ${dowse_daemons_conf}/node-red
+. $dowse_daemons_conf/node-red
 
-PATH=${dowse_install_dir}/nodejs/node_dir/bin \
-NODE_PATH="${dowse_install_dir}/nodejs/node_dir/lib/node_modules:${dowse_install_dir}/node-red/node_modules" \
-		nodejs ${dowse_install_dir}/node-red/red.js -s ${daemons_conf}/node-red $* &
+nodereddir=$dowse_livedir/node-red/nodes
 
+if [ ! -d $nodereddir ]; then
+	mkdir -p $nodereddir
+fi
+
+NODE_PATH="$dowse_install_dir/src/node_modules" \
+		$dowse_install_dir/src/node_modules/node-red/bin/node-red-pi \
+		-s $dowse_generated_conf/node-red.conf
