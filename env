@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/sh
 #
 # This file contains general variables used among the project.
 
@@ -11,7 +11,7 @@ dowse_daemons=${dowse_install_dir}/daemons
 dowse_daemons_conf=${dowse_daemons}/conf
 dowse_generated_conf=${dowse_livedir}/conf
 
-source ${dowse_config}/settings
+. ${dowse_sysconfdir}/settings
 
 # cover defaults
 interface=${interface:-lo}
@@ -28,38 +28,38 @@ lan=${lan:-dowse.it}
 
 firewall=${firewall:-yes}
 
-net_devices=()
-net.scan_devices
-net_ip4_addr=()
-net.scan_addresses
+net_devices=""
+devices=$(find /sys/devices/ -name net)
+for i in $devices; do
+	for dev in $(ls --indicator-style=none $i); do
+		# skip the loopback device
+		[ "$dev" = "lo" ] && continue
+		net_devices="$net_devices $dev"
+	done
+done
+for interface in $net_devices; do
+	_addr=`ip addr show $interface | awk '/inet / {print $2}'`
+	[ "$_addr" = "" ] && continue
+	range=${_addr#*/}
+	address=${_addr%/*}
 
-for d in $net_devices; do
-	local _addr=${net_ip4_addr[$d]}
-	range=${_addr[(ws:/:)2]}
-	_addr=${_addr[(ws:/:)1]}
-	[[ "$_addr" = "" ]] && continue
-
-	wan=`ip route show dev $d | awk '/default/ {print $3}'`
-	[[ "$wan" = "" ]] && continue
-
-	act "$d $_addr $range # detected network config"
-	address=$_addr
-	interface=$d
+	wan=`ip route show dev $interface | awk '/default/ {print $3}'`
+	[ "$wan" = "" ] && continue
 
 	# render the dowse_net
-	if [[ $range == 24 ]]; then
-		subn=${wan[(ws:.:)1]}.${wan[(ws:.:)2]}.${wan[(ws:.:)3]}
+	if [ $range = 24 ]; then
+		subn=${wan%\.*}
 		dowse_net=$subn.0/24
 		netmask=255.255.255.0
 		dowse_guests=$subn.101,$subn.199,48h
-	elif [[ $range == 16 ]]; then
-		subn=${wan[(ws:.:)1]}.${wan[(ws:.:)2]}
+	elif [ $range = 16 ]; then
+		subn=${wan%\.*\.*}
 		dowse_net=$subn.0.0/16
 		netmask=255.255.0.0
 		dowse_guests=$subn.0.101,$subn.255.199,48h
-	elif [[ $range == 8 ]]; then
-		subn=${wan[(ws:.:)1]}
-		dowse_net=${subn}.0.0.0/8
+	elif [ $range = 8 ]; then
+		subn=${wan%%\.*}
+		dowse_net=$subn.0.0.0/8
 		netmask=255.0.0.0
 		dowse_guests=$subn.0.0.101,$subn.255.255.199,48h
 	fi
