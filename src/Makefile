@@ -22,7 +22,6 @@ NODE_RED_MODULES= node-red \
 		node-red-node-twitter
 
 all: base springs
-	#./checksum.sh $(DOWSE_USER)
 
 node-red:
 	npm install $(NODE_RED_MODULES)
