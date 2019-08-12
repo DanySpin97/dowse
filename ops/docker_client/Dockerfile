@@ -6,5 +6,5 @@ RUN apt-get update && \
 
 COPY ops/client_test_dns.sh test.sh
 
-CMD ip addr flush dev eth0 && dhclient && ping 1.1.1.1 && ./test.sh
+CMD ip addr flush dev eth0 && dhclient && ping -c4 1.1.1.1 && ./test.sh
 
