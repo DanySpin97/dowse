@@ -1,8 +1,11 @@
-#!/usr/bin/zsh
+#!/bin/sh
+
+. /opt/dowse/env
 
 hostname=$hostname \
 		domain=$lan \
 		address=$address \
 		interface=$interface \
-		exec webui2 -p ${dowse_livedir}/webui2.pid >/dev/null 2>/dev/null
+		exec python3 $dowse_install_dir/src/webui2/webui.py \
+		-p ${dowse_livedir}/webui2.pid
 
