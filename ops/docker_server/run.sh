@@ -4,17 +4,31 @@ usage() {
 	echo "Usage: $0 [ -i ]"
 }
 
+interactive=""
+sync=""
 if [ "$#" -ge 1 ]; then
 	if [ "$1" = "-h" ]; then
 		usage
 		exit 1
-	elif [ "$1" != "-i" ]; then
-		usage
-		exit 1
 	fi
-	docker run -it dowse_server /bin/sh scripts/start_supervisiond.sh \
-			&& scripts/start.sh && /bin/bash
+	for i in seq 2 ; do
+		if [ "$1" = "-i" ]; then
+			interactive="on"
+		elif [ "$1" = "-s" ]; then
+			sync="on"
+		fi
+		# FIX ME
+		shift
+	done
+fi
+
+if [ "$sync" = "on" ]; then
+	args="-v $(pwd):/opt/dowse/"
+fi
+
+if [ "$interactive" = "on" ]; then
+	docker run $args --privileged -p 8000:8000 -it dowse_server /bin/bash
 else
-	docker run -d dowse_server
+	docker run $args --privileged -d -p 8000:8000 dowse_server
 fi
 
