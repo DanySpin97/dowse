@@ -1,6 +1,3 @@
 [submodule "src/domain-list"]
 	path = src/domain-list
 	url = https://github.com/dyne/domain-list
-[submodule "src/pg2ipset"]
-	path = src/pg2ipset
-	url = git@github.com:ilikenwf/pg2ipset.git
