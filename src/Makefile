@@ -7,31 +7,14 @@ CFLAGS = -Wall -fPIE -fPIC -pie -O3 -I.
 CFLAGS+=$(shell pkg-config --cflags hiredis)
 LIBS = -l:libhiredis.a -Llibdowse -l:libdowse.a
 
-NODE_RED_MODULES= node-red \
-		node-red-dashboard \
-		node-red-contrib-ifttt \
-		node-red-contrib-got \
-		node-red-contrib-get-hrefs \
-		node-red-contrib-get-feeds \
-		node-red-contrib-device-stats \
-		node-red-contrib-chatbot \
-		node-red-ddm \
-		node-red-node-pisrf \
-		node-red-node-random \
-		node-red-node-smooth \
-		node-red-node-twitter
-
 all: base springs
-
-node-red:
-	npm install $(NODE_RED_MODULES)
 
 libs:
 	make -C libdowse
 
 .PHONY: hiredis-lock
 
-base: libs node-red netdata-plugins
+base: libs netdata-plugins
 	@echo "Compiled base"
 
 netdata-plugins:

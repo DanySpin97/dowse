@@ -19,7 +19,7 @@ if [ $apt != "no" ]; then
 
 	# TODO replace --yes with --allow
 	apt-get install --no-install-recommends --yes --fix-missing \
-		zsh iptables build-essential autoconf automake libhiredis-dev libkmod-dev libjemalloc-dev pkg-config libtool libltdl-dev libsodium-dev libldns-dev libnetfilter-queue-dev uuid-dev zlib1g-dev cmake liblo-dev nmap python3-flask python3-redis xmlstarlet wget libcap2-bin redis libhiredis-dev isc-dhcp-server stubby dnsmasq snooze netdata libwebsockets8 supervisor mosquitto kmod nodejs npm libmosquitto-dev
+		iptables build-essential autoconf automake libhiredis-dev libkmod-dev libjemalloc-dev pkg-config libtool libltdl-dev libsodium-dev libldns-dev libnetfilter-queue-dev uuid-dev zlib1g-dev cmake liblo-dev nmap python3-flask python3-redis xmlstarlet wget libcap2-bin redis libhiredis-dev isc-dhcp-server stubby dnsmasq snooze netdata libwebsockets8 supervisor mosquitto kmod libmosquitto-dev python3-flask python3-isc-dhcp-leases python3-netifaces
 fi
 
 set +e
